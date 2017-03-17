@@ -1,4 +1,5 @@
 
+import errno
 import hashlib
 import math
 import mimetypes
@@ -202,7 +203,7 @@ class Key(object):
         if domain is True :
            url = url.replace('http://'+self.bucket.name+'.','http://')
            url = url.replace('https://'+self.bucket.name+'.','https://')
-        
+
         return url
 
     def should_retry(self, response, chunked_transfer=False):
