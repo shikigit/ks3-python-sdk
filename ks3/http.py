@@ -19,7 +19,7 @@ def merge_meta(headers, metadata):
     return final_headers
 
 
-def query_args_hash_to_string(query_args):    
+def query_args_hash_to_string(query_args):
     pairs = []
     for k, v in query_args.items():
         piece = k
@@ -33,22 +33,23 @@ def query_args_hash_to_string(query_args):
 def get_object_url(age, bucket="", key="", secret_access_key="", access_key_id="", query_args={}):
     expire = str(int(time.time()) + age)
     headers = {"Date": expire}
-    c_string = canonical_string("GET", bucket, key, query_args, headers)    
+    c_string = canonical_string("GET", bucket, key, query_args, headers)
     path = c_string.split("\n")[-1]
-    
+
     signature = urllib.quote_plus(encode(secret_access_key, c_string))
     if "?" in path:
         url = "http://kss.ksyun.com%s&Expires=%s&AccessKeyId=%s&Signature=%s" % \
             (path, expire, access_key_id, signature)
     else:
         url = "http://kss.ksyun.com%s?Expires=%s&AccessKeyId=%s&Signature=%s" % \
-            (path, expire, access_key_id, signature)        
+            (path, expire, access_key_id, signature)
     return url
 
 
-def make_request(server, port, access_key_id, access_key_secret, method, 
-                 bucket="", key="", query_args=None, headers=None, data="", 
-                 metadata=None, call_fmt=CallingFormat.PATH, is_secure=False):
+def make_request(server, port, access_key_id, access_key_secret, method,
+                 bucket="", key="", query_args=None, headers=None, data="",
+                 metadata=None, call_fmt=CallingFormat.PATH, is_secure=False,
+                 timeout=5):
     if not headers:
         headers = {}
     #if not query_args:
@@ -85,11 +86,11 @@ def make_request(server, port, access_key_id, access_key_secret, method,
         path += "?" + query_args
 
     host = "%s:%d" % (server, port)
-    
+
     if (is_secure):
-        connection = httplib.HTTPSConnection(host)
+        connection = httplib.HTTPSConnection(host, timeout=timeout)
     else:
-        connection = httplib.HTTPConnection(host)
+        connection = httplib.HTTPConnection(host, timeout=timeout)
 
     final_headers = merge_meta(headers, metadata)
     if method == "PUT" and "Content-Length" not in final_headers and not data:
